@@ -41,7 +41,9 @@ export default function InspectScreen({
   const [cameraReady, setCameraReady] = useState(false);
   const [cameraError, setCameraError] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
+  const [facingMode, setFacingMode] = useState<"environment" | "user">(
+    "environment",
+  );
 
   const startCamera = useCallback(async () => {
     // Stop any existing stream
@@ -378,7 +380,9 @@ export default function InspectScreen({
                   whiteSpace: "nowrap",
                 }}
               >
-                {language === "hi" ? "उत्पाद को बीच में रखें" : "Center produce in the frame"}
+                {language === "hi"
+                  ? "उत्पाद को बीच में रखें"
+                  : "Center produce in the frame"}
               </div>
 
               {/* Corner guides */}
@@ -454,10 +458,10 @@ export default function InspectScreen({
                       c.r === "tl"
                         ? "4px 0 0 0"
                         : c.r === "tr"
-                        ? "0 4px 0 0"
-                        : c.r === "bl"
-                        ? "0 0 0 4px"
-                        : "0 0 4px 0",
+                          ? "0 4px 0 0"
+                          : c.r === "bl"
+                            ? "0 0 0 4px"
+                            : "0 0 4px 0",
                   }}
                 />
               ))}
@@ -517,18 +521,26 @@ export default function InspectScreen({
               <div
                 style={{
                   padding: "24px 20px",
+                  paddingBottom: "calc(24px + env(safe-area-inset-bottom, 16px))",
                   background: "rgba(0,0,0,0.85)",
                   backdropFilter: "blur(20px)",
                   borderTop: "1px solid rgba(255,255,255,0.1)",
                 }}
               >
-                <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 12,
+                    marginBottom: 16,
+                  }}
+                >
                   {/* Retake Button */}
                   <button
                     className="ios-btn"
                     onClick={() => setPreviewImage(null)}
                     style={{
-                      flex: 1,
+                      flex: "1 1 150px",
                       padding: "16px",
                       borderRadius: 18,
                       background: "rgba(255,255,255,0.1)",
@@ -552,7 +564,7 @@ export default function InspectScreen({
                     onClick={() => analyzeImage(previewImage)}
                     disabled={isAnalyzing}
                     style={{
-                      flex: 2,
+                      flex: "2 1 220px",
                       padding: "16px",
                       borderRadius: 18,
                       background: isAnalyzing
@@ -585,12 +597,13 @@ export default function InspectScreen({
                     marginTop: 12,
                   }}
                 >
-                  {language === "hi" ? "फोटो चयन की पुष्टि करें" : "Confirming your photo selection"}
+                  {language === "hi"
+                    ? "फोटो चयन की पुष्टि करें"
+                    : "Confirming your photo selection"}
                 </p>
               </div>
             </div>
           )}
-
         </>
       </div>
 
@@ -626,7 +639,8 @@ export default function InspectScreen({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: cameraReady && !previewImage ? "#fff" : "rgba(255,255,255,0.3)",
+              color:
+                cameraReady && !previewImage ? "#fff" : "rgba(255,255,255,0.3)",
             }}
           >
             <RefreshCw size={18} />
@@ -689,7 +703,9 @@ export default function InspectScreen({
             letterSpacing: "0.04em",
           }}
         >
-          {language === "hi" ? "स्कैन करने के लिए शटर दबाएं · गैलरी से चुनने के लिए अपलोड आइकन दबाएं" : "Tap shutter to analyze · Tap upload icon to pick from gallery"}
+          {language === "hi"
+            ? "स्कैन करने के लिए शटर दबाएं · गैलरी से चुनने के लिए अपलोड आइकन दबाएं"
+            : "Tap shutter to analyze · Tap upload icon to pick from gallery"}
         </p>
       </div>
 
