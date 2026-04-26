@@ -11,6 +11,8 @@ import {
   X,
   Zap,
   RefreshCw,
+  RotateCcw,
+  Check,
   Volume2,
   VolumeX,
 } from "lucide-react";
@@ -484,7 +486,7 @@ export default function InspectScreen({
             </div>
           )}
 
-          {/* Uploaded Preview Overlay */}
+          {/* Uploaded Preview Overlay - Now only covers camera area */}
           {previewImage && (
             <div
               className="animate-fade-in"
@@ -494,7 +496,7 @@ export default function InspectScreen({
                 background: "#000",
                 display: "flex",
                 flexDirection: "column",
-                zIndex: 40,
+                zIndex: 10, // Below buttons but above video
               }}
             >
               <div
@@ -513,95 +515,28 @@ export default function InspectScreen({
                   style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "contain",
+                    objectFit: "cover",
                   }}
                 />
-              </div>
-
-              <div
-                style={{
-                  padding: "24px 20px",
-                  paddingBottom:
-                    "calc(24px + env(safe-area-inset-bottom, 16px))",
-                  background: "rgba(0,0,0,0.85)",
-                  backdropFilter: "blur(20px)",
-                  borderTop: "1px solid rgba(255,255,255,0.1)",
-                }}
-              >
                 <div
                   style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 12,
-                    marginBottom: 16,
-                  }}
-                >
-                  {/* Retake Button */}
-                  <button
-                    className="ios-btn"
-                    onClick={() => setPreviewImage(null)}
-                    style={{
-                      flex: "1 1 150px",
-                      padding: "16px",
-                      borderRadius: 18,
-                      background: "rgba(255,255,255,0.1)",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      color: "#fff",
-                      fontWeight: 600,
-                      fontSize: 15,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <RefreshCw size={18} />
-                    {language === "hi" ? "फिर से लें" : "Retake"}
-                  </button>
-
-                  {/* Analyze Button */}
-                  <button
-                    className="ios-btn"
-                    onClick={() => analyzeImage(previewImage)}
-                    disabled={isAnalyzing}
-                    style={{
-                      flex: "2 1 220px",
-                      padding: "16px",
-                      borderRadius: 18,
-                      background: isAnalyzing
-                        ? "rgba(48,209,88,0.3)"
-                        : "linear-gradient(135deg, #30d158, #34c759)",
-                      border: "none",
-                      color: "#fff",
-                      fontWeight: 700,
-                      fontSize: 16,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 10,
-                      boxShadow: "0 4px 24px rgba(48,209,88,0.35)",
-                    }}
-                  >
-                    {isAnalyzing ? (
-                      <Loader2 size={18} className="animate-spin" />
-                    ) : (
-                      <Zap size={18} />
-                    )}
-                    {language === "hi" ? "विश्लेषण करें" : "Analyze"}
-                  </button>
-                </div>
-                <p
-                  style={{
-                    textAlign: "center",
+                    position: "absolute",
+                    top: 20,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: "rgba(0,0,0,0.5)",
+                    backdropFilter: "blur(12px)",
+                    borderRadius: 20,
+                    padding: "7px 16px",
                     fontSize: 12,
-                    color: "rgba(255,255,255,0.4)",
-                    marginTop: 12,
+                    fontWeight: 600,
+                    color: "#fff",
+                    whiteSpace: "nowrap",
+                    border: "1px solid rgba(255,255,255,0.1)",
                   }}
                 >
-                  {language === "hi"
-                    ? "फोटो चयन की पुष्टि करें"
-                    : "Confirming your photo selection"}
-                </p>
+                  {language === "hi" ? "पूर्वावलोकन" : "Preview"}
+                </div>
               </div>
             </div>
           )}
@@ -629,8 +564,8 @@ export default function InspectScreen({
           {/* Flip camera */}
           <button
             className="ios-btn"
-            onClick={flipCamera}
-            disabled={!cameraReady || !!previewImage}
+            onClick={previewImage ? () => setPreviewImage(null) : flipCamera}
+            disabled={!cameraReady && !previewImage}
             style={{
               width: 48,
               height: 48,
@@ -640,38 +575,37 @@ export default function InspectScreen({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color:
-                cameraReady && !previewImage ? "#fff" : "rgba(255,255,255,0.3)",
+              color: "#fff",
             }}
           >
-            <RefreshCw size={18} />
+            {previewImage ? <RotateCcw size={18} /> : <RefreshCw size={18} />}
           </button>
 
           {/* Shutter button */}
           <button
             className="ios-btn"
-            onClick={captureFromCamera}
-            disabled={!cameraReady || isAnalyzing || !!previewImage}
+            onClick={previewImage ? () => analyzeImage(previewImage) : captureFromCamera}
+            disabled={(!cameraReady && !previewImage) || isAnalyzing}
             style={{
               width: 76,
               height: 76,
               borderRadius: "50%",
-              background:
-                !cameraReady || isAnalyzing || !!previewImage
-                  ? "rgba(48,209,88,0.3)"
-                  : "linear-gradient(135deg, #30d158, #28b84e)",
+              background: "linear-gradient(135deg, #30d158, #28b84e)",
               border: "3px solid rgba(255,255,255,0.2)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow:
-                cameraReady && !isAnalyzing && !previewImage
-                  ? "0 0 0 6px rgba(48,209,88,0.15), 0 8px 32px rgba(48,209,88,0.4)"
-                  : "none",
+              boxShadow: "0 4px 24px rgba(48,209,88,0.4)",
               transition: "all 0.2s ease",
             }}
           >
-            <Zap size={28} color="#fff" />
+            {isAnalyzing ? (
+              <Loader2 size={28} color="#fff" className="animate-spin" />
+            ) : previewImage ? (
+              <Check size={32} color="#fff" />
+            ) : (
+              <Zap size={28} color="#fff" />
+            )}
           </button>
 
           {/* Upload shortcut */}
@@ -704,7 +638,11 @@ export default function InspectScreen({
             letterSpacing: "0.04em",
           }}
         >
-          {language === "hi"
+          {previewImage
+            ? language === "hi"
+              ? "विश्लेषण करने के लिए शटर दबाएं · फिर से लेने के लिए बाएं दबाएं"
+              : "Tap shutter to analyze · Tap left to retake"
+            : language === "hi"
             ? "स्कैन करने के लिए शटर दबाएं · गैलरी से चुनने के लिए अपलोड आइकन दबाएं"
             : "Tap shutter to analyze · Tap upload icon to pick from gallery"}
         </p>
