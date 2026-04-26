@@ -81,13 +81,54 @@ export default function InspectScreen({
 
   const captureFromCamera = async () => {
     if (!videoRef.current || !canvasRef.current || isAnalyzing) return;
-    const ctx = canvasRef.current.getContext("2d");
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvasRef.current.width = videoRef.current.videoWidth;
-    canvasRef.current.height = videoRef.current.videoHeight;
-    ctx.drawImage(videoRef.current, 0, 0);
-    const image = canvasRef.current.toDataURL("image/jpeg", 0.9);
+    // Get video dimensions
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    
+    // Get container dimensions (the viewport)
+    const cw = video.offsetWidth;
+    const ch = video.offsetHeight;
+    
+    // Calculate visible area for "object-fit: cover"
+    const containerRatio = cw / ch;
+    const videoRatio = vw / vh;
+    
+    let sx, sy, sw, sh;
+    if (videoRatio > containerRatio) {
+      // Video is wider than container
+      sw = vh * containerRatio;
+      sh = vh;
+      sx = (vw - sw) / 2;
+      sy = 0;
+    } else {
+      // Video is taller than container
+      sw = vw;
+      sh = vw / containerRatio;
+      sx = 0;
+      sy = (vh - sh) / 2;
+    }
+
+    // Target dimensions (max 1024px)
+    const MAX_DIM = 1024;
+    let targetW = sw;
+    let targetH = sh;
+    if (targetW > MAX_DIM || targetH > MAX_DIM) {
+      const scale = MAX_DIM / Math.max(targetW, targetH);
+      targetW *= scale;
+      targetH *= scale;
+    }
+
+    canvas.width = targetW;
+    canvas.height = targetH;
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, targetW, targetH);
+    
+    // Compress with 0.7 quality (good balance of speed vs quality)
+    const image = canvas.toDataURL("image/jpeg", 0.7);
     setPreviewImage(image);
   };
 
@@ -97,11 +138,30 @@ export default function InspectScreen({
 
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const image = ev.target?.result as string;
-      setPreviewImage(image);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_DIM = 1024;
+        let w = img.width;
+        let h = img.height;
+
+        if (w > MAX_DIM || h > MAX_DIM) {
+          const scale = MAX_DIM / Math.max(w, h);
+          w *= scale;
+          h *= scale;
+        }
+
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, w, h);
+        
+        const optimized = canvas.toDataURL("image/jpeg", 0.7);
+        setPreviewImage(optimized);
+      };
+      img.src = ev.target?.result as string;
     };
     reader.readAsDataURL(file);
-    // Reset input so same file can be re-selected
     e.target.value = "";
   };
 
