@@ -521,7 +521,8 @@ export default function InspectScreen({
               <div
                 style={{
                   padding: "24px 20px",
-                  paddingBottom: "calc(24px + env(safe-area-inset-bottom, 16px))",
+                  paddingBottom:
+                    "calc(24px + env(safe-area-inset-bottom, 16px))",
                   background: "rgba(0,0,0,0.85)",
                   backdropFilter: "blur(20px)",
                   borderTop: "1px solid rgba(255,255,255,0.1)",
